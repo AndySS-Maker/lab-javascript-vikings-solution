@@ -47,66 +47,103 @@ class Saxon extends Soldier {
 }
 
 class War {
+  // Quando definimos atributos de classe fora do constructor, não precisamos usar o 'this'
   vikingArmy = [];
   saxonArmy = [];
 
-  addViking(viking) {
-    this.vikingArmy.push(viking);
-    return;
+  addViking(vikingInstance) {
+    this.vikingArmy.push(vikingInstance);
   }
 
-  addSaxon(saxon) {
-    this.saxonArmy.push(saxon);
-    return;
+  addSaxon(saxonInstance) {
+    this.saxonArmy.push(saxonInstance);
   }
 
-  getRandomSoldier(army) {
-    return Math.floor(Math.random() * army.length);
+  armyAttack(army) {
+    const randomVikingIndex = Math.floor(
+      Math.random() * this.vikingArmy.length
+    );
+    const randomSaxonIndex = Math.floor(Math.random() * this.saxonArmy.length);
+
+    const randomVikingSoldier = this.vikingArmy[randomVikingIndex];
+    const randomSaxonSoldier = this.saxonArmy[randomSaxonIndex];
+
+    if (army === "Viking") {
+      const attackResult = randomSaxonSoldier.receiveDamage(
+        randomVikingSoldier.strength
+      );
+
+      this.checkDead(randomSaxonSoldier);
+
+      return attackResult;
+    }
+
+    const attackResult = randomVikingSoldier.receiveDamage(
+      randomSaxonSoldier.strength
+    );
+
+    this.checkDead(randomVikingSoldier);
+
+    return attackResult;
+  }
+
+  checkDead(soldier) {
+    if (soldier.health <= 0) {
+      if (soldier instanceof Viking) {
+        const index = this.vikingArmy.indexOf(soldier);
+
+        if (index > -1) {
+          this.vikingArmy.splice(index, 1);
+        }
+      } else {
+        const index = this.saxonArmy.indexOf(soldier);
+
+        if (index > -1) {
+          this.saxonArmy.splice(index, 1);
+        }
+      }
+    }
   }
 
   vikingAttack() {
-    const randomVikingIndex = this.getRandomSoldier(this.vikingArmy);
-
-    const randomSaxonIndex = this.getRandomSoldier(this.saxonArmy);
-
-    const vikingSoldier = this.vikingArmy[randomVikingIndex];
-    const saxonSoldier = this.saxonArmy[randomSaxonIndex];
-
-    const damageReceived = saxonSoldier.receiveDamage(vikingSoldier.strength);
-
-    if (saxonSoldier.health <= 0) {
-      this.saxonArmy.splice(randomSaxonIndex, 1);
-    }
-
-    return damageReceived;
+    return this.armyAttack("Viking");
   }
 
   saxonAttack() {
-    const randomVikingIndex = this.getRandomSoldier(this.vikingArmy);
-
-    const randomSaxonIndex = this.getRandomSoldier(this.saxonArmy);
-
-    const vikingSoldier = this.vikingArmy[randomVikingIndex];
-    const saxonSoldier = this.saxonArmy[randomSaxonIndex];
-
-    const damageReceived = vikingSoldier.receiveDamage(saxonSoldier.strength);
-
-    if (vikingSoldier.health <= 0) {
-      this.vikingArmy.splice(randomVikingIndex, 1);
-    }
-
-    return damageReceived;
+    return this.armyAttack("Saxon");
   }
 
   showStatus() {
-    if (this.vikingArmy.length === 0) {
-      return "Saxons have fought for their lives and survived another day...";
+    if (!this.saxonArmy.length) {
+      return "Vikings have won the war of the century!";
     }
 
-    if (this.saxonArmy.length === 0) {
-      return "Vikings have won the war of the century!";
+    if (!this.vikingArmy.length) {
+      return "Saxons have fought for their lives and survived another day...";
     }
 
     return "Vikings and Saxons are still in the thick of battle.";
   }
 }
+
+const war = new War();
+
+war.addSaxon(new Saxon(2, 4));
+war.addSaxon(new Saxon(2, 4));
+war.addSaxon(new Saxon(2, 4));
+war.addSaxon(new Saxon(2, 4));
+
+war.addViking(new Viking("Ragnar", 4, 5));
+war.addViking(new Viking("Rudá", 4, 5));
+war.addViking(new Viking("Rollo", 4, 5));
+war.addViking(new Viking("Ivar", 4, 5));
+
+war.vikingAttack();
+
+console.log(war);
+
+war.saxonAttack();
+
+console.log(war);
+
+console.log(war.showStatus());
